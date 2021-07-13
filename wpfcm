@@ -1,0 +1,181 @@
+clear 
+close all
+clc
+img= imread(fullfile('93ed57c7dd5204b5c6ed77d1d47e452.bmp'));
+[m,n]=size(img);
+figure(1);
+imshow(img);
+img=double(img);
+
+c=3;
+ui=zeros(m,n,c);%初始化隶属度
+ti=zeros(m,n,c);%初始化ti
+vi=zeros(1,c);%初始化聚类中心
+d=zeros(m,n,c);%初始化距离
+yi=zeros(m,n,c);%初始化惩罚因子
+m1=2;
+q1=2;
+ee=0.1;
+kk=0;
+t1=clock;
+vi(1)=40;
+vi(2)=100;
+vi(3)=160;
+x_average=0;
+
+n1=zeros(1,c);
+for i =1:m
+    for j =1:n
+        x_average =double(img(i,j))+double(x_average);
+    end
+end
+x_average=x_average/(m*n);
+while kk<1000 && ee>0.0001
+    v =vi;
+    for i =1:m
+        for j =1:n
+            for k= 1:c
+                d(i,j,k)=(img(i,j)-vi(k))^2 +0.0001;
+            end
+        end
+    end
+    for k=1:c
+        temp1=0;
+        for i=1:m
+            for j=1:n
+                temp1=temp1+(img(i,j)-x_average)^2;
+            end
+        end
+        temp1 =double(temp1);
+        for i=1:m
+            for j=1:n
+                yi(i,j,k)=exp((temp1*c)/(-d(i,j,k)*(m*n)));
+            end
+        end
+    end
+    for i = 1:m
+        for j = 1:n
+            temp=0;
+            for k= 1:c
+                temp =temp+d(i,j,k)*(1-yi(i,j,k))+0.0001;
+            end
+            for k= 1:c
+                ui(i,j,k)=(d(i,j,k)*(1-yi(i,j,k))/temp)^-1/(m-1);
+            end
+        end
+    end
+    for i =1:m
+        for j =1:n
+            temp2 =0;
+            for k =1:c
+                temp2 =temp2+ui(i,j,k);
+            end
+            for k =1:c
+            ui(i,j,k)=ui(i,j,k)/(temp2+0.0001);
+            end
+        end
+    end
+    for k=1:c
+        temp3 =0;
+        for i=1:m
+            for j=1:n
+                temp3 =temp3+ui(i,j,k)^m1*d(i,j,k);
+            end
+        end
+        temp4=0;
+        for i=1:m
+            for j =1:n
+                temp4 =temp4 +ui(i,j,k)^m1;
+            end
+        end
+        n1(k)=temp3/temp4;
+    end
+    for i =1:m
+        for j =1:n
+            for k=1:c
+                ti(i,j,k)=1/(1+((yi(i,j,k)/n1(k))*d(i,j,k))^(1/(q1-1)));
+            end
+        end
+    end
+    for k =1:c
+        temp5=0;
+        temp6=0;
+        for i =1:m
+            for j =1:n
+                temp5=((1-yi(i,j,k))*ui(i,j,k)^m1+yi(i,j,k)*ti(i,j,k)^q1)*img(i,j)+temp5;
+                temp6=((1-yi(i,j,k))*ui(i,j,k)^m1+yi(i,j,k)*ti(i,j,k)^q1)+temp6;
+            end
+        end
+        vi(k)=temp5/(temp6+0.0001);
+    end
+    temp7 =0;
+    for k=1:c
+        temp7 =temp7+(vi(k)-v(k))^2;
+    end
+    if temp7<0.0001
+        ee=0.0001;
+    end
+    kk = kk+1;
+end
+data1=zeros(m,n);
+for i=1:m
+    for j=1:n
+        if c==2
+            if u(i,j,1)>u(i,j,2)
+                data1(i,j)=0;
+            else
+                data1(i,j)=255;
+            end
+        end
+        if c==3
+            if ui(i,j,1)>ui(i,j,2) && ui(i,j,1)>ui(i,j,3)
+                data1(i,j)=0;
+            elseif ui(i,j,2)>ui(i,j,1) && ui(i,j,2)>ui(i,j,3)
+                data1(i,j)=125;
+            elseif ui(i,j,3)>ui(i,j,1) && ui(i,j,3)>ui(i,j,2)
+                data1(i,j)=255;
+            end
+        end
+        if c==4
+            if u(i,j,1)>u(i,j,2) && u(i,j,1)>u(i,j,3) && u(i,j,1)>u(i,j,4)
+                data1(i,j)=50;
+            end
+            if u(i,j,2)>u(i,j,1) && u(i,j,2)>u(i,j,3) && u(i,j,2)>u(i,j,4)
+                data1(i,j)=150;
+            end
+            if u(i,j,3)>u(i,j,1) && u(i,j,3)>u(i,j,2) && u(i,j,3)>u(i,j,4)
+                data1(i,j)=255;
+            end
+            if u(i,j,4)>u(i,j,1) && u(i,j,4)>u(i,j,2) && u(i,j,4)>u(i,j,3)
+                data1(i,j)=0;
+            end
+        end
+        if c==5
+            if u(i,j,1)>u(i,j,2) && u(i,j,1)>u(i,j,3) && u(i,j,1)>u(i,j,4) && u(i,j,1)>u(i,j,5)
+                data1(i,j)=0;
+            end
+            if u(i,j,2)>u(i,j,1) && u(i,j,2)>u(i,j,3) && u(i,j,2)>u(i,j,4) && u(i,j,2)>u(i,j,5)
+                data1(i,j)=46;
+            end
+            if u(i,j,3)>u(i,j,1) && u(i,j,3)>u(i,j,2) && u(i,j,3)>u(i,j,4) && u(i,j,3)>u(i,j,5)
+                data1(i,j)=105;
+            end
+            if u(i,j,4)>u(i,j,1) && u(i,j,4)>u(i,j,2) && u(i,j,4)>u(i,j,3) && u(i,j,4)>u(i,j,5)
+                data1(i,j)=176;
+            end
+            if u(i,j,5)>u(i,j,1) && u(i,j,5)>u(i,j,2) && u(i,j,5)>u(i,j,3) && u(i,j,5)>u(i,j,4)
+                data1(i,j)=255;
+            end
+        end
+    end
+end
+figure(2);imshow(uint8(data1));title('wpfcm分割图'); 
+%question：img转换为double类型。
+                
+    
+
+                
+
+                
+                
+                
