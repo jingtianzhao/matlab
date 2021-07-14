@@ -57,10 +57,10 @@ while kk<1000 && ee>0.0001
         for j = 1:n
             temp=0;
             for k= 1:c
-                temp =temp+d(i,j,k)*(1-yi(i,j,k))+0.0001;
+                temp =temp+d(i,j,k)*(1-yi(i,j,k));question务必求和里面所有的因子
             end
             for k= 1:c
-                ui(i,j,k)=(d(i,j,k)*(1-yi(i,j,k))/temp)^-1/(m-1);
+                ui(i,j,k)=(d(i,j,k)*(1-yi(i,j,k))/temp)^-1/(m-1);%question
             end
         end
     end
@@ -171,6 +171,7 @@ for i=1:m
 end
 figure(2);imshow(uint8(data1));title('wpfcm分割图'); 
 %question：img转换为double类型。
+%question：在计算公式时，如果出现求和，求和式子里面的指数，对数，不可随便带出求和公式。
                 
     
 
